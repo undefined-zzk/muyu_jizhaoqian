@@ -48,6 +48,9 @@
         <text class="merit-value">{{totalMerit}}</text>
       </view>
     </view>
+    <view class="share-merit-btn" bindtap="shareMerit">
+      <image class="share-icon" src="/assets/icon/share.svg" mode="aspectFit"></image>
+    </view>
   </view>
 
   <!-- 木鱼主体 -->
@@ -107,8 +110,23 @@
   </view>
 
   <!-- 底部提示 -->
-  <view class="footer-tip" style="bottom: {{safeAreaBottom + 30}}px;">
+  <view class="footer-tip">
     <text>💡 长按木鱼3秒，触发隐藏祝福</text>
+  </view>
+
+  <!-- 其他小程序推荐 -->
+  <view class="other-apps">
+    <view class="apps-title">更多推荐</view>
+    <view class="apps-list">
+      <view class="app-item" bindtap="navigateToMiniProgram" data-appid="wx3104a8a7e1ed35cb" data-name="日常转盘">
+        <text class="app-icon">🎯</text>
+        <text class="app-name">日常转盘</text>
+      </view>
+      <view class="app-item" bindtap="navigateToMiniProgram" data-appid="wxf4512e1d75f7e27c" data-name="反应力测试助手">
+        <text class="app-icon">⚡</text>
+        <text class="app-name">反应力测试</text>
+      </view>
+    </view>
   </view>
 
   <!-- 抽签结果弹窗 -->
@@ -152,6 +170,9 @@
     <!-- 隐藏的 Canvas 用于生成图片 -->
     <canvas type="2d" id="fortuneCanvas" class="fortune-canvas"></canvas>
   </view>
+
+  <!-- 隐藏的 Canvas 用于生成功德统计图片 -->
+  <canvas type="2d" id="meritCanvas" class="merit-canvas"></canvas>
 
   <!-- 祈愿墙弹窗 -->
   <view class="wish-modal {{showWishWall ? 'show' : ''}}" wx:if="{{showWishWall}}">

@@ -87,9 +87,6 @@ Page({
     // 初始化音频
     this.data.audioContext = wx.createInnerAudioContext();
     this.data.audioContext.src = '/assets/audio/muyu.mp3';
-    
-    // 启动自动敲击
-    this.startAutoTap();
   },
 
   onUnload() {
@@ -217,6 +214,9 @@ Page({
 
   // 处理触摸开始（用于长按检测）
   handleTouchStart() {
+    // 自动敲击时禁止手动操作
+    if (this.data.autoTapping) return;
+    
     this.data.pressStartTime = Date.now();
     this.data.longPressTimer = setTimeout(() => {
       this.longPressMuyu();
@@ -225,6 +225,9 @@ Page({
 
   // 处理触摸结束
   handleTouchEnd() {
+    // 自动敲击时禁止手动操作
+    if (this.data.autoTapping) return;
+    
     const pressDuration = Date.now() - this.data.pressStartTime;
     clearTimeout(this.data.longPressTimer);
     
@@ -519,35 +522,24 @@ Page({
     ctx.closePath();
   },
 
-  // 分享配置（从胶囊按钮分享，不生成图片）
+  // 分享配置（从胶囊按钮分享给好友）
   onShareAppMessage() {
-    const { currentFortune } = this.data;
-    
-    if (currentFortune) {
-      return {
-        title: `${currentFortune.title} - ${currentFortune.content}`,
-        path: '/pages/index/index'
-      };
-    }
+    const { todayMerit, totalMerit } = this.data;
     
     return {
-      title: '木鱼吉兆签 - 佛系治愈 · 解压祈福',
-      path: '/pages/index/index'
+      title: `我的功德：今日${todayMerit}，总计${totalMerit} - 木鱼吉兆签`,
+      path: '/pages/index/index',
+      imageUrl: '' // 使用默认截图
     };
   },
 
-  // 分享到朋友圈（生成图片）
+  // 分享到朋友圈（从胶囊按钮分享）
   onShareTimeline() {
-    const { currentFortune } = this.data;
-    
-    if (currentFortune) {
-      return {
-        title: `${currentFortune.title} - ${currentFortune.content}`
-      };
-    }
+    const { todayMerit, totalMerit } = this.data;
     
     return {
-      title: '木鱼吉兆签 - 佛系治愈 · 解压祈福'
+      title: `我的功德：今日${todayMerit}，总计${totalMerit} - 木鱼吉兆签`,
+      imageUrl: '' // 使用默认截图
     };
   },
 
@@ -731,6 +723,179 @@ Page({
     wx.setStorageSync('bgIndex', index);
     
     this.showToast(`已切换至${BACKGROUNDS[index].name}`, 'none');
+  },
+
+  // 分享到朋友圈（生成图片）
+  onShareTimeline() {
+    return {
+      title: '木鱼吉兆签 - 佛系治愈 · 解压祈福',
+      imageUrl: '' // 使用默认截图
+    };
+  },
+
+  // 分享功德到朋友圈
+  shareMeritToTimeline() {
+    this.generateMeritImage((tempFilePath) => {
+      // 保存图片路径供分享使用
+      this.setData({ shareImagePath: tempFilePath });
+      
+      // 提示用户通过右上角分享
+      this.showModal('分享到朋友圈', '请点击右上角"..."按钮，选择"分享到朋友圈"', () => {});
+    });
+  },
+
+  // 分享功德统计
+  shareMerit() {
+    this.generateMeritImage((tempFilePath) => {
+      wx.showShareImageMenu({
+        path: tempFilePath,
+        success: () => {
+          console.log('分享成功');
+        },
+        fail: (err) => {
+          console.error('分享失败', err);
+          // 分享失败不显示提示
+        }
+      });
+    });
+  },
+
+  // 获取当前背景的渐变色
+  getCurrentBgGradient() {
+    const bgGradients = {
+      'bg-gradient1': ['#FEF3C7', '#FFEDD5', '#FEE2E2'],
+      'bg-gradient2': ['#EFF6FF', '#F3E8FF', '#FCE7F3'],
+      'bg-gradient3': ['#ECFDF5', '#E0F2FE', '#CFFAFE'],
+      'bg-gradient4': ['#FEFCE8', '#FEF3C7', '#FFEDD5'],
+      'bg-solid1': ['#F5F5F4', '#F5F5F4'],
+      'bg-solid2': ['#FEF3C7', '#FEF3C7']
+    };
+    return bgGradients[this.data.currentBg] || ['#FEF3C7', '#FFEDD5'];
+  },
+
+  // 生成功德统计图片
+  generateMeritImage(callback) {
+    const { todayMerit, totalMerit } = this.data;
+    const today = this.formatDate(new Date());
+    const bgColors = this.getCurrentBgGradient();
+    
+    wx.showLoading({ title: '生成图片中...' });
+    
+    const query = wx.createSelectorQuery();
+    query.select('#meritCanvas')
+      .fields({ node: true, size: true })
+      .exec((res) => {
+        if (!res[0]) {
+          wx.hideLoading();
+          this.showToast('生成失败', 'none');
+          return;
+        }
+        
+        const canvas = res[0].node;
+        const ctx = canvas.getContext('2d');
+        const dpr = wx.getSystemInfoSync().pixelRatio;
+        
+        // 设置 canvas 尺寸
+        canvas.width = 600 * dpr;
+        canvas.height = 800 * dpr;
+        ctx.scale(dpr, dpr);
+        
+        // 绘制背景（使用当前选择的背景色）
+        const gradient = ctx.createLinearGradient(0, 0, 0, 800);
+        if (bgColors.length === 2) {
+          gradient.addColorStop(0, bgColors[0]);
+          gradient.addColorStop(1, bgColors[1]);
+        } else {
+          gradient.addColorStop(0, bgColors[0]);
+          gradient.addColorStop(0.5, bgColors[1]);
+          gradient.addColorStop(1, bgColors[2]);
+        }
+        ctx.fillStyle = gradient;
+        this.drawRoundRect(ctx, 0, 0, 600, 800, 40);
+        ctx.fill();
+        
+        // 绘制标题
+        ctx.fillStyle = '#78350F';
+        ctx.font = 'bold 48px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('木鱼吉兆签', 300, 100);
+        
+        // 绘制日期
+        ctx.fillStyle = '#D97706';
+        ctx.font = '24px sans-serif';
+        ctx.fillText(today, 300, 150);
+        
+        // 绘制功德卡片背景（上下对称）
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        this.drawRoundRect(ctx, 80, 260, 440, 320, 30);
+        ctx.fill();
+        
+        // 绘制总功德
+        ctx.fillStyle = '#D97706';
+        ctx.font = '28px sans-serif';
+        ctx.fillText('总功德', 300, 320);
+        
+        ctx.fillStyle = '#78350F';
+        ctx.font = 'bold 80px sans-serif';
+        ctx.fillText(totalMerit.toString(), 300, 395);
+        
+        // 绘制分隔线
+        ctx.fillStyle = '#FCD34D';
+        ctx.fillRect(150, 455, 300, 2);
+        
+        // 绘制今日功德
+        ctx.fillStyle = '#D97706';
+        ctx.font = '28px sans-serif';
+        ctx.fillText('今日功德', 300, 495);
+        
+        ctx.fillStyle = '#78350F';
+        ctx.font = 'bold 60px sans-serif';
+        ctx.fillText(todayMerit.toString(), 300, 550);
+        
+        // 绘制底部文字
+        ctx.fillStyle = '#92400E';
+        ctx.font = '24px sans-serif';
+        ctx.fillText('佛系治愈 · 解压祈福', 300, 680);
+        
+        // 绘制装饰云朵
+        ctx.fillStyle = 'rgba(253, 230, 138, 0.5)';
+        [200, 300, 400].forEach((x) => {
+          ctx.beginPath();
+          ctx.ellipse(x, 620, 30, 15, 0, 0, 2 * Math.PI);
+          ctx.fill();
+        });
+        
+        // 导出图片
+        setTimeout(() => {
+          wx.canvasToTempFilePath({
+            canvas,
+            success: (canvasRes) => {
+              wx.hideLoading();
+              callback && callback(canvasRes.tempFilePath);
+            },
+            fail: () => {
+              wx.hideLoading();
+              this.showToast('生成失败', 'none');
+            }
+          });
+        }, 100);
+      });
+  },
+
+  // 导航到其他小程序
+  navigateToMiniProgram(e) {
+    const { appid, name } = e.currentTarget.dataset;
+    wx.navigateToMiniProgram({
+      appId: appid,
+      success: () => {
+        console.log(`成功跳转到${name}`);
+      },
+      fail: (err) => {
+        console.error('跳转失败', err);
+        this.showToast('跳转失败，请稍后重试', 'none');
+      }
+    });
   },
 
   // 启动自动敲击
