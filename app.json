@@ -3,13 +3,19 @@
     "pages/index/index"
   ],
   "window": {
-    "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "Weixin",
-    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "木鱼吉兆签",
+    "navigationBarBackgroundColor": "#8B7355",
+    "backgroundColor": "#F5F0E8",
     "navigationStyle": "custom"
   },
   "style": "v2",
   "componentFramework": "glass-easel",
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.writePhotosAlbum": {
+      "desc": "保存签文图片到相册"
+    }
+  }
 }

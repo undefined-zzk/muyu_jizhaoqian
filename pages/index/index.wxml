@@ -1,1 +1,235 @@
-<view>app</view>
+<view class="page-container {{currentBg}}">
+  <!-- 自定义状态栏占位 -->
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+  
+  <!-- 顶部标题 -->
+  <view class="header">
+    <view class="title-section">
+      <text class="main-title">木鱼吉兆签</text>
+      <text class="subtitle">佛系治愈 · 解压祈福</text>
+    </view>
+  </view>
+  
+  <!-- 背景切换按钮（可拖拽） -->
+  <view class="theme-btn {{isDragging ? 'dragging' : ''}} {{themeBtnAnimating ? 'animating' : ''}}" 
+        bindtap="toggleThemeSelector"
+        bindtouchstart="themeBtnTouchStart"
+        bindtouchmove="themeBtnTouchMove"
+        bindtouchend="themeBtnTouchEnd"
+        style="left: {{themeBtnLeft}}px; top: {{themeBtnTop}}px;">
+    <text class="icon">🎨</text>
+  </view>
+
+  <!-- 背景选择器 -->
+  <view class="bg-selector {{showBgSelector ? 'show' : ''}}" wx:if="{{showBgSelector}}">
+    <view class="bg-selector-title">选择背景</view>
+    <view class="bg-grid">
+      <view class="bg-item {{currentBgIndex === index ? 'active' : ''}}" 
+            wx:for="{{backgrounds}}" 
+            wx:key="id"
+            bindtap="selectBackground"
+            data-index="{{index}}">
+        <view class="bg-preview {{item.class}}"></view>
+        <text class="bg-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功德值显示 -->
+  <view class="merit-display">
+    <view class="merit-box" bindlongpress="resetMerit">
+      <view class="merit-row">
+        <text class="merit-label">今日功德</text>
+        <text class="merit-value">{{todayMerit}}</text>
+      </view>
+      <view class="merit-divider"></view>
+      <view class="merit-row">
+        <text class="merit-label">总功德</text>
+        <text class="merit-value">{{totalMerit}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 木鱼主体 -->
+  <view class="muyu-container">
+    <view class="muyu-wrapper {{isShaking ? 'shake' : ''}}" 
+          bindtap="tapMuyu" 
+          bindlongpress="longPressMuyu"
+          catch:touchstart="handleTouchStart"
+          catch:touchend="handleTouchEnd">
+      
+      <!-- 木鱼棒（一直显示，槌头在上） -->
+      <view class="muyu-stick {{showStick ? 'hitting' : ''}}">
+        <view class="stick-head"></view>
+        <view class="stick-handle"></view>
+      </view>
+      
+      <!-- 木鱼 SVG 图形 -->
+      <view class="muyu-svg">
+        <view class="muyu-body"></view>
+        <view class="muyu-hollow"></view>
+        <view class="muyu-top"></view>
+      </view>
+      
+      <!-- 功德+1浮动文字（支持多个） -->
+      <view class="merit-float show" wx:for="{{floatingMerits}}" wx:key="id">
+        <text>功德 +1</text>
+      </view>
+    </view>
+    
+    <view class="muyu-hint">轻触木鱼 · 静心祈福</view>
+  </view>
+
+  <!-- 抽签按钮 -->
+  <view class="draw-section">
+    <button class="draw-btn {{!canDrawToday ? 'disabled' : ''}} {{isDrawing ? 'drawing' : ''}}" 
+            bindtap="drawLottery" 
+            disabled="{{!canDrawToday || isDrawing}}">
+      <text class="btn-icon">✨</text>
+      <text class="btn-text">{{isDrawing ? '抽签中...' : (canDrawToday ? '今日吉兆' : '明日再来')}}</text>
+      <text class="btn-icon">✨</text>
+    </button>
+  </view>
+
+  <!-- 自动敲击按钮 -->
+  <view class="auto-tap-section">
+    <button class="auto-tap-btn {{autoTapping ? 'active' : ''}}" bindtap="toggleAutoTap">
+      <image class="btn-icon" src="/assets/icon/{{autoTapping ? 'play' : 'start'}}.svg" mode="aspectFit"></image>
+      <text class="btn-text">{{autoTapping ? '停止自动' : '自动敲击'}}</text>
+    </button>
+  </view>
+
+  <!-- 祈愿墙入口 -->
+  <view class="wish-entry" bindtap="openWishWall" style="bottom: {{safeAreaBottom + 60}}px;">
+    <text class="wish-icon">❤️</text>
+    <text class="wish-text">祈愿墙</text>
+    <view class="wish-badge" wx:if="{{wishes.length > 0}}">{{wishes.length}}</view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer-tip" style="bottom: {{safeAreaBottom + 30}}px;">
+    <text>💡 长按木鱼3秒，触发隐藏祝福</text>
+  </view>
+
+  <!-- 抽签结果弹窗 -->
+  <view class="fortune-modal {{showFortune ? 'show' : ''}}" wx:if="{{showFortune}}">
+    <view class="modal-mask" bindtap="closeFortune"></view>
+    <view class="fortune-content {{fortuneAnimating ? 'animating' : ''}}">
+      <view class="fortune-card" id="fortuneCard">
+        <view class="fortune-close-btn" bindtap="closeFortune">
+          <text>✕</text>
+        </view>
+        
+        <view class="fortune-title">{{currentFortune.title}}</view>
+        <view class="fortune-date">{{currentFortune.date}}</view>
+        
+        <view class="fortune-divider">
+          <view class="divider-line"></view>
+          <view class="divider-dot"></view>
+          <view class="divider-line"></view>
+        </view>
+        
+        <view class="fortune-text">{{currentFortune.content}}</view>
+        <view class="fortune-blessing">{{currentFortune.blessing}}</view>
+        
+        <view class="fortune-clouds">
+          <view class="cloud" wx:for="{{[1,2,3]}}" wx:key="*this"></view>
+        </view>
+        
+        <view class="fortune-actions">
+          <button class="action-btn save-btn" bindtap="saveFortune">
+            <image class="btn-icon" src="/assets/icon/download-white.svg" mode="aspectFit"></image>
+            <text>保存图片</text>
+          </button>
+          <button class="action-btn share-btn" bindtap="showShareImageMenu">
+            <image class="btn-icon" src="/assets/icon/share-brown.svg" mode="aspectFit"></image>
+            <text>分享</text>
+          </button>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 隐藏的 Canvas 用于生成图片 -->
+    <canvas type="2d" id="fortuneCanvas" class="fortune-canvas"></canvas>
+  </view>
+
+  <!-- 祈愿墙弹窗 -->
+  <view class="wish-modal {{showWishWall ? 'show' : ''}}" wx:if="{{showWishWall}}">
+    <view class="modal-mask" bindtap="closeWishWall"></view>
+    <view class="wish-wall-content">
+      <view class="wish-wall-header">
+        <text class="wish-wall-title">祈愿墙</text>
+        <text class="wish-wall-subtitle">写下心愿，诚心祈福</text>
+        <view class="wish-close-btn" bindtap="closeWishWall">
+          <text>✕</text>
+        </view>
+      </view>
+      
+      <scroll-view class="wish-list" scroll-y show-scrollbar="{{false}}">
+        <view class="wish-item" wx:for="{{wishes}}" wx:key="id">
+          <text class="wish-heart">❤️</text>
+          <view class="wish-content">
+            <text class="wish-text">{{item.text}}</text>
+            <text class="wish-date">{{item.date}}</text>
+          </view>
+          <view class="wish-delete-btn" bindtap="deleteWish" data-id="{{item.id}}">
+            <text>✕</text>
+          </view>
+        </view>
+        
+        <view class="wish-empty" wx:if="{{wishes.length === 0}}">
+          <text>还没有心愿，快来许下第一个愿望吧</text>
+        </view>
+      </scroll-view>
+      
+      <view class="wish-input-area" style="padding-bottom: calc(32rpx + {{safeAreaBottom}}px);">
+        <input class="wish-input" 
+               placeholder="写下你的心愿..." 
+               maxlength="50"
+               value="{{wishInput}}"
+               bindinput="onWishInput"
+               confirm-type="send"
+               bindconfirm="submitWish" />
+        <view class="wish-send-btn {{wishInput ? '' : 'disabled'}}" bindtap="submitWish">
+          <image class="send-icon" src="/assets/image/send.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 彩蛋特效 -->
+  <view class="blessing-effect {{showBlessing ? 'show' : ''}}" wx:if="{{showBlessing}}">
+    <view class="blessing-item" 
+          wx:for="{{blessingItems}}" 
+          wx:key="index" 
+          style="left: {{item.left}}%; animation-delay: {{item.delay}}s;">
+      {{item.icon}}
+    </view>
+    
+    <view class="blessing-message">
+      <view class="blessing-text">{{currentBlessingText}}</view>
+      <view class="blessing-merit">功德 +{{currentBlessingMerit}}</view>
+    </view>
+  </view>
+
+  <!-- 自定义 Toast -->
+  <view class="custom-toast {{showCustomToast ? 'show' : ''}}" wx:if="{{showCustomToast}}">
+    <view class="toast-content">
+      <text class="toast-icon" wx:if="{{toastIcon === 'success'}}">✓</text>
+      <text class="toast-message">{{toastMessage}}</text>
+    </view>
+  </view>
+
+  <!-- 自定义 Modal -->
+  <view class="custom-modal {{showCustomModal ? 'show' : ''}}" wx:if="{{showCustomModal}}">
+    <view class="modal-mask" bindtap="cancelModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">{{modalTitle}}</view>
+      <view class="modal-body">{{modalContent}}</view>
+      <view class="modal-footer">
+        <view class="modal-btn cancel-btn" bindtap="cancelModal">取消</view>
+        <view class="modal-btn confirm-btn" bindtap="confirmModal">确定</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,1111 @@
+/* 页面容器与背景主题 */
+.page-container {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 状态栏占位 */
+.status-bar {
+  width: 100%;
+  background: transparent;
+}
+
+.bg-gradient1 { background: linear-gradient(135deg, #FEF3C7 0%, #FFEDD5 50%, #FEE2E2 100%); }
+.bg-gradient2 { background: linear-gradient(135deg, #EFF6FF 0%, #F3E8FF 50%, #FCE7F3 100%); }
+.bg-gradient3 { background: linear-gradient(135deg, #ECFDF5 0%, #E0F2FE 50%, #CFFAFE 100%); }
+.bg-gradient4 { background: linear-gradient(135deg, #FEFCE8 0%, #FEF3C7 50%, #FFEDD5 100%); }
+.bg-solid1 { background: #F5F5F4; }
+.bg-solid2 { background: #FEF3C7; }
+
+/* 顶部标题区域 */
+.header {
+  position: relative;
+  padding: 20rpx 40rpx 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.main-title {
+  font-size: 56rpx;
+  color: #78350F;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: #D97706;
+}
+
+.theme-btn {
+  position: fixed;
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10rpx);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(120, 53, 15, 0.15);
+  z-index: 999;
+}
+
+.theme-btn.dragging {
+  transition: none;
+  box-shadow: 0 12rpx 32rpx rgba(120, 53, 15, 0.3);
+  transform: scale(1.1);
+}
+
+.theme-btn.animating {
+  transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.theme-btn .icon {
+  font-size: 40rpx;
+  pointer-events: none;
+}
+
+/* 背景选择器 */
+.bg-selector {
+  position: fixed;
+  top: 160rpx;
+  right: 40rpx;
+  width: 360rpx;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20rpx);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 20rpx 60rpx rgba(120, 53, 15, 0.2);
+  z-index: 998;
+  opacity: 0;
+  transform: scale(0.9) translateY(-20rpx);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.bg-selector.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.bg-selector-title {
+  font-size: 28rpx;
+  color: #78350F;
+  margin-bottom: 24rpx;
+}
+
+.bg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+}
+
+.bg-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.bg-preview {
+  width: 120rpx;
+  height: 100rpx;
+  border-radius: 16rpx;
+  border: 4rpx solid transparent;
+  transition: all 0.2s ease;
+}
+
+.bg-item.active .bg-preview {
+  border-color: #D97706;
+  transform: scale(0.95);
+}
+
+.bg-name {
+  font-size: 22rpx;
+  color: #78350F;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+/* 功德值显示 */
+.merit-display {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 60rpx;
+}
+
+.merit-box {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10rpx);
+  border-radius: 32rpx;
+  padding: 24rpx 48rpx;
+  box-shadow: 0 12rpx 32rpx rgba(120, 53, 15, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 32rpx;
+}
+
+.merit-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.merit-divider {
+  width: 2rpx;
+  height: 60rpx;
+  background: linear-gradient(180deg, transparent 0%, #D97706 50%, transparent 100%);
+}
+
+.merit-label {
+  font-size: 22rpx;
+  color: #D97706;
+}
+
+.merit-value {
+  font-size: 48rpx;
+  color: #78350F;
+  font-weight: bold;
+}
+
+/* 木鱼容器 */
+.muyu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32rpx;
+  margin-top: 40rpx;
+}
+
+.muyu-wrapper {
+  position: relative;
+  width: 384rpx;
+  height: 384rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 木鱼棒样式 */
+.muyu-stick {
+  position: absolute;
+  top: -100rpx;
+  right: -80rpx;
+  width: 160rpx;
+  height: 240rpx;
+  transform: rotate(-45deg);
+  transform-origin: 80rpx 220rpx;
+  z-index: 10;
+  pointer-events: none;
+  transition: transform 0.1s ease;
+}
+
+.muyu-stick.hitting {
+  animation: stickHit 0.3s ease-out;
+}
+
+@keyframes stickHit {
+  0% {
+    transform: rotate(-45deg);
+  }
+  50% {
+    transform: rotate(-90deg);
+  }
+  100% {
+    transform: rotate(-45deg);
+  }
+}
+
+.stick-head {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48rpx;
+  height: 60rpx;
+  background: linear-gradient(180deg, #CD853F 0%, #8B4513 100%);
+  border-radius: 50% 50% 24rpx 24rpx;
+  box-shadow: 0 6rpx 16rpx rgba(139, 69, 19, 0.4);
+}
+
+.stick-handle {
+  position: absolute;
+  top: 60rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16rpx;
+  height: 180rpx;
+  background: linear-gradient(180deg, #A0522D 0%, #8B4513 100%);
+  border-radius: 8rpx;
+  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.3);
+}
+
+/* 木鱼 SVG 样式 */
+.muyu-svg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  filter: drop-shadow(0 20rpx 40rpx rgba(139, 69, 19, 0.3));
+}
+
+.muyu-body {
+  position: absolute;
+  width: 269rpx;
+  height: 192rpx;
+  background: #8B4513;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.muyu-body::after {
+  content: '';
+  position: absolute;
+  width: 230rpx;
+  height: 161rpx;
+  background: #A0522D;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.muyu-hollow {
+  position: absolute;
+  width: 134rpx;
+  height: 96rpx;
+  background: #3D2817;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.muyu-top {
+  position: absolute;
+  width: 192rpx;
+  height: 134rpx;
+  background: #A0522D;
+  border-radius: 50%;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* 木鱼晃动动画 */
+.muyu-wrapper.shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-3deg) scale(0.98); }
+  50% { transform: rotate(3deg) scale(0.95); }
+  75% { transform: rotate(-3deg) scale(0.98); }
+}
+
+/* 功德浮动文字 */
+.merit-float {
+  position: absolute;
+  top: -60rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 40rpx;
+  color: #D97706;
+  font-weight: bold;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.merit-float.show {
+  animation: floatUp 0.8s ease-out;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-120rpx);
+  }
+}
+
+.muyu-hint {
+  font-size: 28rpx;
+  color: #92400E;
+  opacity: 0.8;
+}
+
+/* 抽签按钮 */
+.draw-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 80rpx;
+  padding: 0 60rpx;
+}
+
+.draw-btn {
+  width: 100%;
+  height: 100rpx;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border-radius: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  box-shadow: 0 12rpx 32rpx rgba(217, 119, 6, 0.3);
+  border: none;
+  color: #78350F;
+  font-size: 32rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.draw-btn::after {
+  border: none;
+}
+
+.draw-btn.disabled {
+  background: #D1D5DB;
+  box-shadow: none;
+  color: #9CA3AF;
+}
+
+.draw-btn.drawing {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.btn-icon {
+  font-size: 36rpx;
+}
+
+/* 自动敲击按钮 */
+.auto-tap-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 24rpx;
+  padding: 0 60rpx;
+}
+
+.auto-tap-btn {
+  width: 100%;
+  height: 88rpx;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10rpx);
+  border: 2rpx solid #D97706;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  box-shadow: 0 8rpx 24rpx rgba(217, 119, 6, 0.15);
+  color: #78350F;
+  font-size: 28rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.auto-tap-btn::after {
+  border: none;
+}
+
+.auto-tap-btn.active {
+  background: linear-gradient(135deg, #FDE68A 0%, #FCD34D 100%);
+  border-color: #F59E0B;
+  box-shadow: 0 12rpx 32rpx rgba(217, 119, 6, 0.3);
+}
+
+.auto-tap-btn .btn-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+/* 祈愿墙入口 */
+.wish-entry {
+  position: fixed;
+  right: 40rpx;
+  width: 120rpx;
+  height: 120rpx;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10rpx);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  box-shadow: 0 12rpx 32rpx rgba(239, 68, 68, 0.25);
+  z-index: 10;
+}
+
+.wish-icon {
+  font-size: 40rpx;
+}
+
+.wish-text {
+  font-size: 22rpx;
+  color: #78350F;
+}
+
+.wish-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  background: #EF4444;
+  color: white;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  min-width: 32rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.4);
+}
+
+/* 底部提示 */
+.footer-tip {
+  position: fixed;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: #D97706;
+  opacity: 0.8;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 弹窗通用样式 */
+.fortune-modal,
+.wish-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: none;
+}
+
+.fortune-modal.show,
+.wish-modal.show {
+  display: block;
+}
+
+.modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 抽签结果弹窗 */
+.fortune-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 650rpx;
+  animation: slideUp 0.5s ease;
+}
+
+.fortune-content.animating {
+  animation: slideUp 0.8s ease, rotateIn 0.8s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -30%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes rotateIn {
+  from {
+    transform: translate(-50%, -50%) rotateY(90deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotateY(0deg);
+  }
+}
+
+.fortune-card {
+  background: linear-gradient(180deg, #FEF3C7 0%, #FFFBEB 100%);
+  border-radius: 40rpx;
+  padding: 80rpx 50rpx 60rpx;
+  box-shadow: 0 20rpx 60rpx rgba(120, 53, 15, 0.25);
+  text-align: center;
+  position: relative;
+}
+
+.fortune-close-btn {
+  position: absolute;
+  top: 30rpx;
+  right: 30rpx;
+  width: 60rpx;
+  height: 60rpx;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: #92400E;
+  line-height: 1;
+}
+
+.fortune-title {
+  font-size: 120rpx;
+  color: #DC2626;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  line-height: 1.2;
+}
+
+.fortune-date {
+  font-size: 28rpx;
+  color: #D97706;
+  margin-bottom: 50rpx;
+}
+
+.fortune-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  margin-bottom: 50rpx;
+}
+
+.divider-line {
+  width: 150rpx;
+  height: 3rpx;
+  background: #F59E0B;
+}
+
+.divider-dot {
+  width: 20rpx;
+  height: 20rpx;
+  background: #F59E0B;
+  border-radius: 50%;
+}
+
+.fortune-text {
+  font-size: 44rpx;
+  color: #78350F;
+  line-height: 70rpx;
+  margin-bottom: 30rpx;
+  font-weight: 500;
+}
+
+.fortune-blessing {
+  font-size: 36rpx;
+  color: #D97706;
+  line-height: 56rpx;
+  margin-bottom: 60rpx;
+}
+
+.fortune-clouds {
+  display: flex;
+  justify-content: center;
+  gap: 40rpx;
+  margin-bottom: 60rpx;
+}
+
+.cloud {
+  width: 80rpx;
+  height: 40rpx;
+  background: #FDE68A;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: cloudFloat 2s ease-in-out infinite;
+}
+
+.cloud:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.cloud:nth-child(3) {
+  animation-delay: 0.8s;
+}
+
+@keyframes cloudFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10rpx); }
+}
+
+.fortune-actions {
+  display: flex;
+  gap: 24rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 96rpx;
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  font-size: 30rpx;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  font-weight: 500;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.action-btn .btn-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.save-btn {
+  background: #D97706;
+  color: white;
+}
+
+.share-btn {
+  background: #FDE68A;
+  color: #78350F;
+}
+
+/* 隐藏的 Canvas */
+.fortune-canvas {
+  position: fixed;
+  left: -9999rpx;
+  top: -9999rpx;
+  width: 650rpx;
+  height: 900rpx;
+}
+
+/* 祈愿墙弹窗 */
+.wish-wall-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 680rpx;
+  max-height: 70vh;
+  background: linear-gradient(180deg, #FEF3C7 0%, #FFEDD5 100%);
+  border-radius: 32rpx;
+  box-shadow: 0 20rpx 60rpx rgba(120, 53, 15, 0.3);
+  overflow: hidden;
+  animation: slideUp 0.5s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.wish-wall-header {
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+  padding: 48rpx 40rpx;
+  text-align: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.wish-close-btn {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  width: 60rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: white;
+  z-index: 10;
+}
+
+.wish-wall-title {
+  font-size: 40rpx;
+  color: white;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.wish-wall-subtitle {
+  font-size: 24rpx;
+  color: #FEF3C7;
+  display: block;
+}
+
+.wish-list {
+  flex: 1;
+  padding: 32rpx;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.wish-list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
+.wish-item {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10rpx);
+  border-radius: 24rpx;
+  padding: 24rpx 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(120, 53, 15, 0.1);
+  display: flex;
+  gap: 20rpx;
+  align-items: flex-start;
+  animation: wishSlideIn 0.5s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@keyframes wishSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.wish-heart {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.wish-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  min-width: 0;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.wish-text {
+  font-size: 28rpx;
+  color: #78350F;
+  line-height: 44rpx;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.wish-date {
+  font-size: 22rpx;
+  color: #D97706;
+}
+
+.wish-delete-btn {
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #DC2626;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.wish-delete-btn:active {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(0.9);
+}
+
+.wish-empty {
+  text-align: center;
+  padding: 200rpx 40rpx;
+  font-size: 28rpx;
+  color: #D97706;
+}
+
+.wish-input-area {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10rpx);
+  padding: 32rpx;
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+  border-top: 2rpx solid #FCD34D;
+  display: flex;
+  gap: 16rpx;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.wish-input {
+  flex: 1;
+  height: 80rpx;
+  background: #FEF3C7;
+  border: 2rpx solid #FCD34D;
+  border-radius: 40rpx;
+  padding: 0 32rpx;
+  font-size: 28rpx;
+  color: #78350F;
+}
+
+.wish-send-btn {
+  width: 80rpx;
+  height: 80rpx;
+  background: #FF7200;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.wish-send-btn .send-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.wish-send-btn.disabled {
+  background: #FFC57E;
+  opacity: 0.8;
+}
+
+/* 彩蛋特效 */
+.blessing-effect {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 999;
+  display: none;
+}
+
+.blessing-effect.show {
+  display: block;
+}
+
+.blessing-item {
+  position: absolute;
+  top: -100rpx;
+  font-size: 60rpx;
+  animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+  to {
+    top: 110vh;
+    transform: rotate(360deg);
+  }
+}
+
+.blessing-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(245, 158, 11, 0.9);
+  backdrop-filter: blur(20rpx);
+  padding: 48rpx 96rpx;
+  border-radius: 48rpx;
+  box-shadow: 0 20rpx 60rpx rgba(120, 53, 15, 0.4);
+  text-align: center;
+  animation: blessingPop 0.5s ease;
+}
+
+@keyframes blessingPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.blessing-text {
+  font-size: 64rpx;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+}
+
+.blessing-merit {
+  font-size: 32rpx;
+  color: #FEF3C7;
+}
+
+/* 自定义 Toast */
+.custom-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.custom-toast.show {
+  opacity: 1;
+}
+
+.toast-content {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10rpx);
+  border-radius: 16rpx;
+  padding: 24rpx 40rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  min-width: 200rpx;
+  justify-content: center;
+}
+
+.toast-icon {
+  font-size: 40rpx;
+  color: #10B981;
+}
+
+.toast-message {
+  font-size: 28rpx;
+  color: white;
+  text-align: center;
+}
+
+/* 自定义 Modal */
+.custom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: none;
+}
+
+.custom-modal.show {
+  display: block;
+}
+
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 560rpx;
+  background: linear-gradient(180deg, #FEF3C7 0%, #FFFBEB 100%);
+  border-radius: 32rpx;
+  box-shadow: 0 20rpx 60rpx rgba(120, 53, 15, 0.3);
+  overflow: hidden;
+  animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.modal-header {
+  padding: 48rpx 40rpx 24rpx;
+  font-size: 36rpx;
+  color: #78350F;
+  font-weight: bold;
+  text-align: center;
+}
+
+.modal-body {
+  padding: 0 40rpx 48rpx;
+  font-size: 28rpx;
+  color: #92400E;
+  line-height: 44rpx;
+  text-align: center;
+}
+
+.modal-footer {
+  display: flex;
+  border-top: 2rpx solid #FDE68A;
+}
+
+.modal-btn {
+  flex: 1;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  transition: background 0.2s ease;
+}
+
+.cancel-btn {
+  color: #92400E;
+  border-right: 2rpx solid #FDE68A;
+}
+
+.cancel-btn:active {
+  background: rgba(253, 230, 138, 0.3);
+}
+
+.confirm-btn {
+  color: #D97706;
+  font-weight: bold;
+}
+
+.confirm-btn:active {
+  background: rgba(253, 230, 138, 0.5);
+}
