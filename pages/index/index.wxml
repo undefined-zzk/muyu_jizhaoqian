@@ -144,7 +144,7 @@
 
   <!-- 其他小程序推荐 -->
   <view class="other-apps">
-    <view class="apps-title">更多推荐</view>
+    <view class="apps-title">更多好玩推荐</view>
     <view class="apps-list">
       <view class="app-item" bindtap="navigateToMiniProgram" data-appid="wx3104a8a7e1ed35cb" data-name="日常转盘">
         <text class="app-icon">🎯</text>
