@@ -20,6 +20,20 @@ const BACKGROUNDS = [
   { id: 'solid2', name: '米黄', class: 'bg-solid2' }
 ];
 
+// 功德等级配置
+const MERIT_LEVELS = [
+  { level: 1, name: '初心者', desc: '踏上修行之路', minMerit: 0, maxMerit: 100 },
+  { level: 2, name: '虔诚者', desc: '心怀善念', minMerit: 100, maxMerit: 500 },
+  { level: 3, name: '修行者', desc: '日日精进', minMerit: 500, maxMerit: 1000 },
+  { level: 4, name: '善信', desc: '积善成德', minMerit: 1000, maxMerit: 5000 },
+  { level: 5, name: '居士', desc: '功德日增', minMerit: 5000, maxMerit: 10000 },
+  { level: 6, name: '善士', desc: '德行圆满', minMerit: 10000, maxMerit: 50000 },
+  { level: 7, name: '大善人', desc: '功德无量', minMerit: 50000, maxMerit: 100000 },
+  { level: 8, name: '菩萨心', desc: '慈悲为怀', minMerit: 100000, maxMerit: 500000 },
+  { level: 9, name: '罗汉果', desc: '证得正果', minMerit: 500000, maxMerit: 1000000 },
+  { level: 10, name: '功德圆满', desc: '圆满成就', minMerit: 1000000, maxMerit: Infinity }
+];
+
 Page({
   data: {
     meritCount: 0,
@@ -61,6 +75,13 @@ Page({
     themeBtnAnimating: false,
     windowWidth: 0,
     windowHeight: 0,
+    // 祈愿墙按钮拖拽相关
+    wishBtnLeft: 0,
+    wishBtnTop: 0,
+    wishBtnStartX: 0,
+    wishBtnStartY: 0,
+    isDraggingWish: false,
+    wishBtnAnimating: false,
     // 自定义提示框
     showCustomToast: false,
     toastMessage: '',
@@ -76,7 +97,21 @@ Page({
     currentBlessingText: '福气满满',
     currentBlessingMerit: 10,
     // 音频
-    audioContext: null
+    audioContext: null,
+    // 功德圆满
+    meritComplete: false,
+    // 功德等级
+    meritLevel: 1,
+    meritLevelName: '初心者',
+    meritLevelDesc: '踏上修行之路',
+    meritProgress: 0,
+    nextLevelMerit: 100,
+    // 等级说明
+    showLevelGuide: false,
+    meritLevels: MERIT_LEVELS.map(level => ({
+      ...level,
+      maxMerit: level.maxMerit === Infinity ? '∞' : level.maxMerit
+    }))
   },
 
   onLoad() {
@@ -87,6 +122,36 @@ Page({
     // 初始化音频
     this.data.audioContext = wx.createInnerAudioContext();
     this.data.audioContext.src = '/assets/audio/muyu.mp3';
+  },
+
+  // 计算功德等级
+  calculateMeritLevel(totalMerit) {
+    let currentLevel = MERIT_LEVELS[0];
+    
+    for (let i = 0; i < MERIT_LEVELS.length; i++) {
+      if (totalMerit >= MERIT_LEVELS[i].minMerit && totalMerit < MERIT_LEVELS[i].maxMerit) {
+        currentLevel = MERIT_LEVELS[i];
+        break;
+      }
+    }
+    
+    // 如果达到最高等级
+    if (totalMerit >= MERIT_LEVELS[MERIT_LEVELS.length - 1].minMerit) {
+      currentLevel = MERIT_LEVELS[MERIT_LEVELS.length - 1];
+    }
+    
+    // 计算进度
+    const progress = currentLevel.maxMerit === Infinity 
+      ? 100 
+      : Math.min(100, ((totalMerit - currentLevel.minMerit) / (currentLevel.maxMerit - currentLevel.minMerit)) * 100);
+    
+    return {
+      level: currentLevel.level,
+      name: currentLevel.name,
+      desc: currentLevel.desc,
+      progress: progress.toFixed(1),
+      nextLevelMerit: currentLevel.maxMerit === Infinity ? totalMerit : currentLevel.maxMerit
+    };
   },
 
   onUnload() {
@@ -120,6 +185,11 @@ Page({
     const themeBtnLeft = windowWidth - btnSize - padding;
     const themeBtnTop = (windowHeight - btnSize) / 2;
     
+    // 初始化 wish-btn 位置（右下角）
+    const wishBtnSize = 60; // 祈愿墙按钮尺寸（px）
+    const wishBtnLeft = windowWidth - wishBtnSize - padding;
+    const wishBtnTop = windowHeight - wishBtnSize - safeAreaBottom - 60;
+    
     this.setData({
       statusBarHeight,
       customBarHeight,
@@ -128,7 +198,9 @@ Page({
       windowHeight,
       safeAreaBottom,
       themeBtnLeft,
-      themeBtnTop
+      themeBtnTop,
+      wishBtnLeft,
+      wishBtnTop
     });
   },
 
@@ -189,6 +261,12 @@ Page({
       wx.setStorageSync('lastMeritDate', today);
     }
     
+    // 检查功德是否圆满
+    const meritComplete = totalMerit >= 1000000;
+    
+    // 计算功德等级
+    const levelInfo = this.calculateMeritLevel(totalMerit);
+    
     this.setData({
       totalMerit,
       todayMerit: newTodayMerit,
@@ -198,8 +276,19 @@ Page({
       currentFortune: lastDrawDate === today ? currentFortune : null,
       wishes,
       currentBgIndex: bgIndex,
-      currentBg: BACKGROUNDS[bgIndex].class
+      currentBg: BACKGROUNDS[bgIndex].class,
+      meritComplete,
+      meritLevel: levelInfo.level,
+      meritLevelName: levelInfo.name,
+      meritLevelDesc: levelInfo.desc,
+      meritProgress: levelInfo.progress,
+      nextLevelMerit: levelInfo.nextLevelMerit
     });
+    
+    // 如果功德圆满，显示提示
+    if (meritComplete) {
+      this.showMeritCompleteMessage();
+    }
   },
 
   // 检查每日重置
@@ -239,6 +328,11 @@ Page({
 
   // 敲击木鱼
   tapMuyu() {
+    // 功德圆满后不能再敲击
+    if (this.data.meritComplete) {
+      return;
+    }
+    
     // 显示木鱼棒敲击动画
     this.setData({ showStick: true });
     setTimeout(() => {
@@ -252,9 +346,6 @@ Page({
       this.data.audioContext.play();
     }
     
-    // 震动反馈
-    wx.vibrateShort({ type: 'light' });
-    
     // 木鱼晃动动画
     this.setData({ isShaking: true });
     setTimeout(() => {
@@ -264,14 +355,40 @@ Page({
     // 增加功德值
     const newTodayMerit = this.data.todayMerit + 1;
     const newTotalMerit = this.data.totalMerit + 1;
+    
+    // 检查是否达到功德圆满
+    const meritComplete = newTotalMerit >= 1000000;
+    
+    // 计算功德等级
+    const levelInfo = this.calculateMeritLevel(newTotalMerit);
+    const levelUp = levelInfo.level > this.data.meritLevel;
+    
     this.setData({ 
       todayMerit: newTodayMerit,
       totalMerit: newTotalMerit,
-      meritCount: newTotalMerit
+      meritCount: newTotalMerit,
+      meritComplete,
+      meritLevel: levelInfo.level,
+      meritLevelName: levelInfo.name,
+      meritLevelDesc: levelInfo.desc,
+      meritProgress: levelInfo.progress,
+      nextLevelMerit: levelInfo.nextLevelMerit
     });
     wx.setStorageSync('todayMerit', newTodayMerit);
     wx.setStorageSync('totalMerit', newTotalMerit);
     wx.setStorageSync('lastMeritDate', this.getToday());
+    
+    // 如果升级了，显示提示
+    if (levelUp) {
+      this.showToast(`恭喜升级：${levelInfo.name}`, 'success');
+    }
+    
+    // 如果刚好达到功德圆满，停止自动敲击并显示提示
+    if (meritComplete) {
+      this.stopAutoTap();
+      this.showMeritCompleteMessage();
+      return;
+    }
     
     // 添加浮动文字
     const floatId = Date.now() + Math.random();
@@ -290,6 +407,11 @@ Page({
 
   // 长按木鱼彩蛋
   longPressMuyu() {
+    // 功德圆满后不能再敲击
+    if (this.data.meritComplete) {
+      return;
+    }
+    
     wx.vibrateShort({ type: 'heavy' });
     
     // 随机选择祝福语和功德值
@@ -317,10 +439,24 @@ Page({
     // 额外功德值
     const newTodayMerit = this.data.todayMerit + randomMerit;
     const newTotalMerit = this.data.totalMerit + randomMerit;
+    
+    // 检查是否达到功德圆满
+    const meritComplete = newTotalMerit >= 1000000;
+    
+    // 计算功德等级
+    const levelInfo = this.calculateMeritLevel(newTotalMerit);
+    const levelUp = levelInfo.level > this.data.meritLevel;
+    
     this.setData({ 
       todayMerit: newTodayMerit,
       totalMerit: newTotalMerit,
-      meritCount: newTotalMerit
+      meritCount: newTotalMerit,
+      meritComplete,
+      meritLevel: levelInfo.level,
+      meritLevelName: levelInfo.name,
+      meritLevelDesc: levelInfo.desc,
+      meritProgress: levelInfo.progress,
+      nextLevelMerit: levelInfo.nextLevelMerit
     });
     wx.setStorageSync('todayMerit', newTodayMerit);
     wx.setStorageSync('totalMerit', newTotalMerit);
@@ -328,20 +464,56 @@ Page({
     
     setTimeout(() => {
       this.setData({ showBlessing: false });
+      
+      // 如果升级了，显示提示
+      if (levelUp) {
+        this.showToast(`恭喜升级：${levelInfo.name}`, 'success');
+      }
+      
+      // 如果达到功德圆满，停止自动敲击并显示提示
+      if (meritComplete) {
+        this.stopAutoTap();
+        this.showMeritCompleteMessage();
+      }
     }, 3000);
   },
 
   // 抽签
   drawLottery() {
-    if (!this.data.canDrawToday || this.data.isDrawing) return;
+    if (this.data.isDrawing) return;
     
+    // 检查今日是否已抽签
+    const today = this.getToday();
+    const lastDrawDate = wx.getStorageSync('lastDrawDate') || '';
+    const currentFortune = wx.getStorageSync('currentFortune') || null;
+    
+    if (lastDrawDate === today && currentFortune) {
+      // 今日已抽签，提示并显示已抽的签文
+      this.showToast('今日已抽签，明日再来', 'none');
+      
+      // 延迟显示签文弹窗
+      setTimeout(() => {
+        this.setData({ 
+          showFortune: true,
+          currentFortune,
+          fortuneAnimating: true
+        });
+        
+        setTimeout(() => {
+          this.setData({ fortuneAnimating: false });
+        }, 800);
+      }, 500);
+      
+      return;
+    }
+    
+    // 开始抽签
     this.setData({ isDrawing: true });
     wx.vibrateShort({ type: 'medium' });
     
     setTimeout(() => {
       // 随机抽取吉签
       const fortune = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
-      const today = this.getToday();
       const currentFortune = {
         ...fortune,
         date: today
@@ -404,7 +576,7 @@ Page({
         },
         fail: (err) => {
           console.error('分享失败', err);
-          this.showToast('分享失败', 'none');
+          // this.showToast('分享失败', 'none');
         }
       });
     });
@@ -457,25 +629,25 @@ Page({
         // 绘制日期
         ctx.fillStyle = '#D97706';
         ctx.font = '28px sans-serif';
-        ctx.fillText(currentFortune.date, 325, 210);
+        ctx.fillText(currentFortune.date, 325, 230);
         
         // 绘制分隔线
         ctx.fillStyle = '#F59E0B';
-        ctx.fillRect(175, 270, 150, 3);
+        ctx.fillRect(175, 300, 150, 3);
         ctx.beginPath();
-        ctx.arc(325, 271.5, 10, 0, 2 * Math.PI);
+        ctx.arc(325, 301.5, 10, 0, 2 * Math.PI);
         ctx.fill();
-        ctx.fillRect(325, 270, 150, 3);
+        ctx.fillRect(325, 300, 150, 3);
         
         // 绘制签文内容
         ctx.fillStyle = '#78350F';
         ctx.font = 'bold 44px sans-serif';
-        ctx.fillText(currentFortune.content, 325, 370);
+        ctx.fillText(currentFortune.content, 325, 400);
         
         // 绘制祝福语
         ctx.fillStyle = '#D97706';
         ctx.font = '36px sans-serif';
-        ctx.fillText(currentFortune.blessing, 325, 450);
+        ctx.fillText(currentFortune.blessing, 325, 480);
         
         // 绘制云朵装饰
         ctx.fillStyle = 'rgba(253, 230, 138, 0.6)';
@@ -545,7 +717,10 @@ Page({
 
   // 打开祈愿墙
   openWishWall() {
-    this.setData({ showWishWall: true });
+    // 只有在非拖拽状态下才打开
+    if (!this.data.isDraggingWish) {
+      this.setData({ showWishWall: true });
+    }
   },
 
   // 关闭祈愿墙
@@ -775,9 +950,19 @@ Page({
 
   // 生成功德统计图片
   generateMeritImage(callback) {
-    const { todayMerit, totalMerit } = this.data;
+    const { todayMerit, totalMerit, meritComplete, meritLevelName } = this.data;
     const today = this.formatDate(new Date());
     const bgColors = this.getCurrentBgGradient();
+    
+    // 功德圆满语录
+    const completeQuotes = [
+      '功德圆满 · 福慧双修',
+      '证得正果 · 圆满成就',
+      '功德无量 · 善莫大焉',
+      '修行圆满 · 吉祥如意',
+      '功成德就 · 福泽绵长'
+    ];
+    const randomQuote = completeQuotes[Math.floor(Math.random() * completeQuotes.length)];
     
     wx.showLoading({ title: '生成图片中...' });
     
@@ -826,43 +1011,92 @@ Page({
         ctx.font = '24px sans-serif';
         ctx.fillText(today, 300, 150);
         
-        // 绘制功德卡片背景（上下对称）
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        this.drawRoundRect(ctx, 80, 260, 440, 320, 30);
-        ctx.fill();
-        
-        // 绘制总功德
-        ctx.fillStyle = '#D97706';
-        ctx.font = '28px sans-serif';
-        ctx.fillText('总功德', 300, 320);
-        
-        ctx.fillStyle = '#78350F';
-        ctx.font = 'bold 80px sans-serif';
-        ctx.fillText(totalMerit.toString(), 300, 395);
-        
-        // 绘制分隔线
-        ctx.fillStyle = '#FCD34D';
-        ctx.fillRect(150, 455, 300, 2);
-        
-        // 绘制今日功德
-        ctx.fillStyle = '#D97706';
-        ctx.font = '28px sans-serif';
-        ctx.fillText('今日功德', 300, 495);
-        
-        ctx.fillStyle = '#78350F';
-        ctx.font = 'bold 60px sans-serif';
-        ctx.fillText(todayMerit.toString(), 300, 550);
-        
-        // 绘制底部文字
-        ctx.fillStyle = '#92400E';
-        ctx.font = '24px sans-serif';
-        ctx.fillText('佛系治愈 · 解压祈福', 300, 680);
+        if (meritComplete) {
+          // 功德圆满样式
+          // 绘制功德卡片背景
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+          this.drawRoundRect(ctx, 60, 240, 480, 380, 30);
+          ctx.fill();
+          
+          // 绘制庆祝图标
+          ctx.font = '80px sans-serif';
+          ctx.fillText('🎊', 300, 280);
+          
+          // 绘制"功德圆满"
+          ctx.fillStyle = '#DC2626';
+          ctx.font = 'bold 64px sans-serif';
+          ctx.fillText('功德圆满', 300, 360);
+          
+          // 绘制等级名称
+          ctx.fillStyle = '#D97706';
+          ctx.font = 'bold 36px sans-serif';
+          ctx.fillText(meritLevelName, 300, 420);
+          
+          // 绘制分隔线
+          ctx.fillStyle = '#FCD34D';
+          ctx.fillRect(180, 460, 240, 2);
+          
+          // 绘制总功德
+          ctx.fillStyle = '#78350F';
+          ctx.font = 'bold 56px sans-serif';
+          ctx.fillText(totalMerit.toString(), 300, 520);
+          
+          ctx.fillStyle = '#92400E';
+          ctx.font = '24px sans-serif';
+          ctx.fillText('总功德', 300, 565);
+          
+          // 绘制语录
+          ctx.fillStyle = '#D97706';
+          ctx.font = '28px sans-serif';
+          ctx.fillText(randomQuote, 300, 680);
+          
+        } else {
+          // 普通样式
+          // 绘制功德卡片背景
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          this.drawRoundRect(ctx, 60, 240, 480, 380, 30);
+          ctx.fill();
+          
+          // 绘制等级名称
+          ctx.fillStyle = '#D97706';
+          ctx.font = 'bold 36px sans-serif';
+          ctx.fillText(meritLevelName, 300, 290);
+          
+          // 绘制总功德标签
+          ctx.fillStyle = '#D97706';
+          ctx.font = '28px sans-serif';
+          ctx.fillText('总功德', 300, 350);
+          
+          // 绘制总功德数值
+          ctx.fillStyle = '#78350F';
+          ctx.font = 'bold 72px sans-serif';
+          ctx.fillText(totalMerit.toString(), 300, 430);
+          
+          // 绘制分隔线
+          ctx.fillStyle = '#FCD34D';
+          ctx.fillRect(180, 480, 240, 2);
+          
+          // 绘制今日功德标签
+          ctx.fillStyle = '#D97706';
+          ctx.font = '28px sans-serif';
+          ctx.fillText('今日功德', 300, 530);
+          
+          // 绘制今日功德数值
+          ctx.fillStyle = '#78350F';
+          ctx.font = 'bold 56px sans-serif';
+          ctx.fillText(todayMerit.toString(), 300, 590);
+          
+          // 绘制底部文字
+          ctx.fillStyle = '#92400E';
+          ctx.font = '24px sans-serif';
+          ctx.fillText('佛系治愈 · 解压祈福', 300, 680);
+        }
         
         // 绘制装饰云朵
         ctx.fillStyle = 'rgba(253, 230, 138, 0.5)';
         [200, 300, 400].forEach((x) => {
           ctx.beginPath();
-          ctx.ellipse(x, 620, 30, 15, 0, 0, 2 * Math.PI);
+          ctx.ellipse(x, 720, 30, 15, 0, 0, 2 * Math.PI);
           ctx.fill();
         });
         
@@ -893,7 +1127,7 @@ Page({
       },
       fail: (err) => {
         console.error('跳转失败', err);
-        this.showToast('跳转失败，请稍后重试', 'none');
+        // this.showToast('跳转失败，请稍后重试', 'none');
       }
     });
   },
@@ -920,13 +1154,124 @@ Page({
 
   // 切换自动敲击
   toggleAutoTap() {
+    // 功德圆满后不能自动敲击
+    if (this.data.meritComplete) {
+      this.showToast('功德已圆满，无需再敲击', 'none');
+      return;
+    }
+    
     if (this.data.autoTapping) {
       this.stopAutoTap();
-      this.showToast('已停止自动敲击', 'none');
+      // this.showToast('已停止自动敲击', 'none');
     } else {
       this.startAutoTap();
-      this.showToast('已开启自动敲击', 'none');
+      // this.showToast('已开启自动敲击', 'none');
     }
+  },
+  
+  // 显示功德圆满提示
+  showMeritCompleteMessage() {
+    wx.vibrateShort({ type: 'heavy' });
+    
+    // 生成特效
+    const items = [];
+    for (let i = 0; i < 100; i++) {
+      items.push({
+        icon: ['✨', '☁️', '🎊', '🎉'][i % 4],
+        left: Math.random() * 100,
+        delay: Math.random() * 1
+      });
+    }
+    
+    this.setData({ 
+      showBlessing: true,
+      blessingItems: items,
+      currentBlessingText: '功德圆满',
+      currentBlessingMerit: '恭喜成就'
+    });
+    
+    setTimeout(() => {
+      this.setData({ showBlessing: false });
+    }, 5000);
+  },
+
+  // wish-btn 拖拽开始
+  wishBtnTouchStart(e) {
+    const touch = e.touches[0];
+    this.setData({
+      wishBtnStartX: touch.clientX - this.data.wishBtnLeft,
+      wishBtnStartY: touch.clientY - this.data.wishBtnTop,
+      isDraggingWish: false,
+      wishBtnAnimating: false
+    });
+  },
+
+  // wish-btn 拖拽中
+  wishBtnTouchMove(e) {
+    const touch = e.touches[0];
+    const left = touch.clientX - this.data.wishBtnStartX;
+    const top = touch.clientY - this.data.wishBtnStartY;
+    
+    // 标记为拖拽状态
+    this.setData({
+      isDraggingWish: true,
+      wishBtnLeft: left,
+      wishBtnTop: top
+    });
+  },
+
+  // wish-btn 拖拽结束
+  wishBtnTouchEnd() {
+    const { wishBtnLeft, wishBtnTop, windowWidth, windowHeight, statusBarHeight, safeAreaBottom } = this.data;
+    const btnSize = 60; // 按钮尺寸（px）
+    const padding = 20; // 边距（px）
+    
+    // 计算中心点
+    const centerX = wishBtnLeft + btnSize / 2;
+    const centerY = wishBtnTop + btnSize / 2;
+    
+    // 判断靠近哪一边
+    let finalLeft = wishBtnLeft;
+    let finalTop = wishBtnTop;
+    
+    // 左右贴边
+    if (centerX < windowWidth / 2) {
+      // 靠左
+      finalLeft = padding;
+    } else {
+      // 靠右
+      finalLeft = windowWidth - btnSize - padding;
+    }
+    
+    // 限制上下范围
+    const minTop = statusBarHeight + 8;
+    const maxTop = windowHeight - btnSize - padding - safeAreaBottom;
+    finalTop = Math.max(minTop, Math.min(maxTop, wishBtnTop));
+    
+    // 缓动贴边（使用 transition 实现平滑动画）
+    this.setData({
+      wishBtnLeft: finalLeft,
+      wishBtnTop: finalTop,
+      wishBtnAnimating: true
+    });
+    
+    // 延迟重置拖拽状态和动画状态
+    setTimeout(() => {
+      this.setData({ 
+        isDraggingWish: false,
+        wishBtnAnimating: false
+      });
+    }, 300);
+  },
+
+  // 显示等级说明
+  showLevelGuide() {
+    this.setData({ showLevelGuide: true });
+  },
+
+  // 关闭等级说明
+  closeLevelGuide() {
+    this.setData({ showLevelGuide: false });
   },
 
   // 获取今日日期

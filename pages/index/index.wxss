@@ -139,16 +139,85 @@
   border-radius: 8rpx;
 }
 
+/* 功德等级显示 */
+.merit-level-container {
+  margin: 0 40rpx 40rpx;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10rpx);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 12rpx 32rpx rgba(120, 53, 15, 0.15);
+}
+
+.merit-level-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.merit-level-title {
+  font-size: 36rpx;
+  color: #D97706;
+  font-weight: bold;
+}
+
+.merit-level-desc {
+  font-size: 24rpx;
+  color: #92400E;
+  opacity: 0.8;
+}
+
+.merit-progress-bar {
+  width: 100%;
+  height: 16rpx;
+  background: #FEF3C7;
+  border-radius: 8rpx;
+  overflow: hidden;
+  margin-bottom: 12rpx;
+}
+
+.merit-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F59E0B 0%, #EA580C 100%);
+  border-radius: 8rpx;
+  transition: width 0.5s ease;
+}
+
+.merit-progress-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 22rpx;
+  color: #D97706;
+}
+
+.level-help-btn {
+  font-size: 22rpx;
+  color: #D97706;
+  opacity: 0.8;
+  padding: 4rpx 12rpx;
+  background: rgba(217, 119, 6, 0.1);
+  border-radius: 8rpx;
+  transition: all 0.2s ease;
+}
+
+.level-help-btn:active {
+  opacity: 1;
+  background: rgba(217, 119, 6, 0.2);
+}
+
 /* 功德值显示 */
 .merit-display {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 16rpx;
   margin-bottom: 60rpx;
+  padding: 0 40rpx;
 }
 
 .merit-box {
+  position: relative;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10rpx);
   border-radius: 32rpx;
@@ -160,9 +229,12 @@
 }
 
 .share-merit-btn {
-  width: 80rpx;
-  height: 80rpx;
-  background: rgba(255, 255, 255, 0.8);
+  position: absolute;
+  top: -16rpx;
+  right: -16rpx;
+  width: 56rpx;
+  height: 56rpx;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10rpx);
   border-radius: 50%;
   display: flex;
@@ -177,8 +249,8 @@
 }
 
 .share-icon {
-  width: 36rpx;
-  height: 36rpx;
+  width: 28rpx;
+  height: 28rpx;
 }
 
 .merit-row {
@@ -380,6 +452,59 @@
   opacity: 0.8;
 }
 
+/* 功德圆满提示 */
+.merit-complete-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32rpx;
+  margin-top: 20rpx;
+  margin-bottom: 40rpx;
+  padding: 80rpx 60rpx;
+  animation: meritCompleteShow 0.8s ease;
+}
+
+@keyframes meritCompleteShow {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.merit-complete-icon {
+  font-size: 160rpx;
+  animation: meritCompleteRotate 2s ease-in-out infinite;
+}
+
+@keyframes meritCompleteRotate {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(10deg) scale(1.1); }
+}
+
+.merit-complete-title {
+  font-size: 72rpx;
+  color: #DC2626;
+  font-weight: bold;
+  text-shadow: 0 4rpx 12rpx rgba(220, 38, 38, 0.3);
+}
+
+.merit-complete-subtitle {
+  font-size: 32rpx;
+  color: #D97706;
+  font-weight: 500;
+}
+
+.merit-complete-desc {
+  font-size: 28rpx;
+  color: #92400E;
+  opacity: 0.8;
+  margin-top: 16rpx;
+}
+
 /* 抽签按钮 */
 .draw-section {
   display: flex;
@@ -410,12 +535,6 @@
 
 .draw-btn::after {
   border: none;
-}
-
-.draw-btn.disabled {
-  background: #D1D5DB;
-  box-shadow: none;
-  color: #9CA3AF;
 }
 
 .draw-btn.drawing {
@@ -475,10 +594,9 @@
   height: 32rpx;
 }
 
-/* 祈愿墙入口 */
+/* 祈愿墙入口（可拖拽） */
 .wish-entry {
   position: fixed;
-  right: 40rpx;
   width: 120rpx;
   height: 120rpx;
   background: rgba(255, 255, 255, 0.95);
@@ -491,6 +609,16 @@
   gap: 8rpx;
   box-shadow: 0 12rpx 32rpx rgba(239, 68, 68, 0.25);
   z-index: 10;
+}
+
+.wish-entry.dragging {
+  transition: none;
+  box-shadow: 0 16rpx 40rpx rgba(239, 68, 68, 0.4);
+  transform: scale(1.1);
+}
+
+.wish-entry.animating {
+  transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .wish-icon {
@@ -1182,4 +1310,133 @@
 
 .confirm-btn:active {
   background: rgba(253, 230, 138, 0.5);
+}
+
+/* 等级说明弹窗 */
+.level-guide-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: none;
+}
+
+.level-guide-modal.show {
+  display: block;
+}
+
+.level-guide-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 640rpx;
+  max-height: 80vh;
+  background: linear-gradient(180deg, #FEF3C7 0%, #FFFBEB 100%);
+  border-radius: 32rpx;
+  box-shadow: 0 20rpx 60rpx rgba(120, 53, 15, 0.3);
+  overflow: hidden;
+  animation: modalSlideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.level-guide-header {
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+  padding: 40rpx;
+  text-align: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.level-guide-title {
+  font-size: 36rpx;
+  color: white;
+  font-weight: bold;
+}
+
+.level-close-btn {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  width: 56rpx;
+  height: 56rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: white;
+}
+
+.level-guide-list {
+  flex: 1;
+  padding: 32rpx;
+  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.level-guide-item {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10rpx);
+  border-radius: 20rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 20rpx rgba(120, 53, 15, 0.1);
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.level-guide-item.current {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border: 2rpx solid #F59E0B;
+  box-shadow: 0 12rpx 32rpx rgba(245, 158, 11, 0.3);
+}
+
+.level-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.level-item-icon {
+  font-size: 28rpx;
+  width: 32rpx;
+  flex-shrink: 0;
+}
+
+.level-item-name {
+  font-size: 32rpx;
+  color: #78350F;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.level-item-desc {
+  font-size: 24rpx;
+  color: #92400E;
+  flex: 1;
+  text-align: right;
+}
+
+.level-item-badge {
+  font-size: 20rpx;
+  color: white;
+  background: #F59E0B;
+  padding: 4rpx 16rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+}
+
+.level-item-range {
+  font-size: 22rpx;
+  color: #D97706;
+  padding-left: 44rpx;
+  opacity: 0.8;
 }
