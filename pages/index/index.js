@@ -660,7 +660,7 @@ Page({
         // 绘制底部文字
         ctx.fillStyle = '#92400E';
         ctx.font = '24px sans-serif';
-        ctx.fillText('木鱼吉兆签 · 佛系治愈', 325, 800);
+        ctx.fillText('木鱼福签 · 佛系治愈', 325, 800);
         
         // 导出图片
         setTimeout(() => {
@@ -699,7 +699,7 @@ Page({
     const { todayMerit, totalMerit } = this.data;
     
     return {
-      title: `我的功德：今日${todayMerit}，总计${totalMerit} - 木鱼吉兆签`,
+      title: `我的功德：今日${todayMerit}，总计${totalMerit} - 木鱼福签`,
       path: '/pages/index/index',
       imageUrl: '' // 使用默认截图
     };
@@ -710,7 +710,7 @@ Page({
     const { todayMerit, totalMerit } = this.data;
     
     return {
-      title: `我的功德：今日${todayMerit}，总计${totalMerit} - 木鱼吉兆签`,
+      title: `我的功德：今日${todayMerit}，总计${totalMerit} - 木鱼福签`,
       imageUrl: '' // 使用默认截图
     };
   },
@@ -903,7 +903,7 @@ Page({
   // 分享到朋友圈（生成图片）
   onShareTimeline() {
     return {
-      title: '木鱼吉兆签 - 佛系治愈 · 解压祈福',
+      title: '木鱼福签 - 佛系治愈 · 解压祈福',
       imageUrl: '' // 使用默认截图
     };
   },
@@ -1004,7 +1004,7 @@ Page({
         ctx.font = 'bold 48px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('木鱼吉兆签', 300, 100);
+        ctx.fillText('木鱼福签', 300, 100);
         
         // 绘制日期
         ctx.fillStyle = '#D97706';
